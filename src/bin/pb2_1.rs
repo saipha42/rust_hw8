@@ -17,7 +17,7 @@ fn main() {
     match save_polar_points(&polar) {
         Ok(_) => println!("Successfully save polar points"),
         Err(e) => {
-            eprintln!("Error at loading csv contents : {}", e);
+            eprintln!("Error at saving csv contents : {}", e);
             process::exit(1)
         }
     };

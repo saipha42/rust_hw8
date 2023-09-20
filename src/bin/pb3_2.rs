@@ -1,9 +1,9 @@
 use hw8::point::{Point, PolarPoint};
-use std::{fs::File, error::Error, process};
+use std::{fs::File, error::Error, process, io::Write};
 
 fn main() {
 
-    let pt_list = match load_points("./polar_pts.csv") {
+    let polar_pt_list = match load_points("./polar_pts.csv") {
         Ok(pts) => pts,
         Err(e) => {
             eprintln!("Error at loading csv contents : {}", e);
@@ -11,11 +11,15 @@ fn main() {
         }
     };
 
-    let polar = to_cartesian(&pt_list);
-
+    let points = to_cartesian(&polar_pt_list);
    
-    let res = output_html(&polar);
-    println!("{}", res);
+    match save_html(&points, "cartesian_points") {
+        Ok(_) => println!("Successfully save cartisian points HTML file"),
+        Err(e) => {
+            eprintln!("Error at saving cartesian HTML file : {}", e);
+            process::exit(1)
+        }
+    };
 
 }
 
@@ -50,7 +54,7 @@ fn to_cartesian(pt_list: &[PolarPoint])-> Vec<Point> {
     polar_list
 }
 
-fn output_html(polar_pts : &[Point]) -> String {
+fn save_html(polar_pts : &[Point], filename : &str) -> Result<(), Box<dyn Error> > {
 
     let mut html = String::new();
     html.push_str("<h3> Cartesian Points </h3>");
@@ -79,5 +83,14 @@ fn output_html(polar_pts : &[Point]) -> String {
 
     html.push_str("</table>");
 
-    return html;
+    let mut filename = String::from(filename);
+    if ! filename.contains(".html") {
+        filename.push_str(".html");
+    }
+
+    let mut html_file = File::create(filename)?;
+
+    html_file.write_all(html.as_bytes())?;
+    
+    Ok(())
 }

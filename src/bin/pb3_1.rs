@@ -1,5 +1,5 @@
 use hw8::point::{Point, PolarPoint};
-use std::{fs::File, error::Error, process};
+use std::{fs::File, error::Error, process, io::Write};
 
 fn main() {
 
@@ -13,9 +13,14 @@ fn main() {
 
     let polar = to_polar(&pt_list);
 
-   
-    let res = output_html(&polar);
-    println!("{}", res);
+
+    match save_html(&polar, "polar_points") {
+        Ok(_) => println!("Successfully save polar points HTML file"),
+        Err(e) => {
+            eprintln!("Error at saving polar HTML file : {}", e);
+            process::exit(1)
+        }
+    };
 
 }
 
@@ -48,7 +53,7 @@ fn to_polar(pt_list: &[Point])-> Vec<PolarPoint> {
     polar_list
 }
 
-fn output_html(polar_pts : &[PolarPoint]) -> String {
+fn save_html(polar_pts : &[PolarPoint], filename : &str) -> Result<(), Box<dyn Error> > {
 
     let mut html = String::new();
     html.push_str("<h3> Polar Points </h3>");
@@ -77,5 +82,16 @@ fn output_html(polar_pts : &[PolarPoint]) -> String {
 
     html.push_str("</table>");
 
-    return html;
+    let mut filename = String::from(filename);
+    if ! filename.contains(".html") {
+        filename.push_str(".html");
+    }
+
+    let mut html_file = File::create(filename)?;
+
+    html_file.write_all(html.as_bytes())?;
+
+    Ok(())
+
+    
 }
